@@ -18,7 +18,6 @@ import {
   Clock,
   Armchair,
   Users,
-  Calendar,
   Settings,
   ArrowLeftRight, // Correct icon name for move
   Trash2,
@@ -26,6 +25,7 @@ import {
   Pencil,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import DateInput from "@/components/ui/date-input";
 import { toast } from "sonner";
 
 const DAYS = [
@@ -853,13 +853,11 @@ export default function ReservationsPage() {
         </div>
 
         {/* Date Picker */}
-        <div className="flex items-center space-x-2 bg-muted rounded-lg p-1.5 sm:p-2 border border-border w-fit shrink-0">
-          <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
-          <input
-            type="date"
+        <div className="flex items-center bg-muted rounded-lg px-3 py-1.5 sm:py-2 border border-border w-fit shrink-0">
+          <DateInput
             value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className="bg-transparent text-foreground text-sm sm:text-base focus:outline-none dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:invert-[.5] cursor-pointer w-[110px] sm:w-auto"
+            onChange={(v) => setDate(v)}
+            className="bg-transparent text-foreground text-sm sm:text-base focus:outline-none cursor-pointer w-[110px] sm:w-auto"
           />
         </div>
       </div>
@@ -2300,14 +2298,12 @@ export default function ReservationsPage() {
                 New Date
               </label>
               <div className="relative">
-                <Input
-                  type="date"
+                <DateInput
                   value={moveDate}
-                  onChange={(e) => setMoveDate(e.target.value)}
-                  className="bg-background border-border text-foreground w-full appearance-none transition-all focus:ring-1 focus:ring-primary h-10 px-3 pl-10"
+                  onChange={(v) => setMoveDate(v)}
+                  className="bg-background border border-border rounded-md text-foreground w-full appearance-none transition-all focus:ring-1 focus:ring-primary h-10 px-3 flex items-center"
                   min={getISTDate()}
                 />
-                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground pointer-events-none" />
               </div>
             </div>
             <div className="space-y-1">

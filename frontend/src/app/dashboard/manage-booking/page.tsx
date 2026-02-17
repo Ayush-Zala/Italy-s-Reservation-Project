@@ -1,14 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import {
-  Calendar as CalendarIcon,
-  Clock,
-  ShieldAlert,
-  Monitor,
-  TreePine,
-  Loader2,
-} from "lucide-react";
+import { Clock, ShieldAlert, Monitor, TreePine, Loader2 } from "lucide-react";
+import DateInput from "@/components/ui/date-input";
 import { reservationService, Slot } from "@/services/reservation.service";
 import {
   availabilityService,
@@ -21,7 +15,6 @@ import {
   CardContent,
   CardDescription,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -134,12 +127,10 @@ export default function ManageBookingPage() {
           </p>
         </div>
         <div className="flex items-center gap-3 bg-muted/50 p-2 sm:p-2.5 rounded-xl border border-border/50 self-center md:self-auto min-w-fit">
-          <CalendarIcon className="h-4 w-4 text-primary shrink-0" />
-          <Input
-            type="date"
+          <DateInput
             value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className="bg-transparent border-none focus-visible:ring-0 p-0 h-auto w-[140px] md:w-[160px] font-medium text-sm sm:text-base dark:[&::-webkit-calendar-picker-indicator]:invert"
+            onChange={(v: string) => setDate(v)}
+            className="bg-transparent text-foreground font-medium text-sm sm:text-base focus:outline-none cursor-pointer w-[110px] sm:w-[150px]"
           />
         </div>
       </div>

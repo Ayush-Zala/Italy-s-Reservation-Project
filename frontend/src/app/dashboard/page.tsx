@@ -37,6 +37,7 @@ import {
 } from "recharts";
 import { WhatsAppTemplateSelector } from "@/components/chat/whatsapp-template-selector";
 import { cn, getMonthName } from "@/lib/utils";
+import DateInput from "@/components/ui/date-input";
 import { useTheme } from "@/context/use-theme";
 
 const getISTDate = () => {
@@ -314,13 +315,11 @@ export default function DashboardPage() {
         </h2>
 
         {/* Date Picker */}
-        <div className="flex items-center space-x-1 sm:space-x-2 bg-muted rounded-lg p-1.5 sm:p-2 border border-border w-fit">
-          <CalendarCheck className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
-          <input
-            type="date"
+        <div className="flex items-center space-x-1 sm:space-x-2 bg-muted rounded-lg px-3 py-1.5 sm:py-2 border border-border w-fit">
+          <DateInput
             value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className="bg-transparent text-foreground text-[13px] sm:text-base focus:outline-none [&::-webkit-calendar-picker-indicator]:invert-[.5] dark:[&::-webkit-calendar-picker-indicator]:invert cursor-pointer w-[105px] sm:w-auto"
+            onChange={(v) => setDate(v)}
+            className="bg-transparent text-foreground text-[13px] sm:text-base focus:outline-none cursor-pointer w-[105px] sm:w-auto"
           />
         </div>
       </div>
@@ -394,22 +393,19 @@ export default function DashboardPage() {
               >
                 <ImageIcon className="h-4 w-4 text-indigo-500" />
               </Button>
-              <div className="flex items-center gap-1 bg-muted rounded-xl px-2 py-1.5 border border-border shadow-inner flex-1 md:flex-none md:w-fit justify-between min-w-0">
-                <Calendar className="h-3 w-3 md:h-3.5 md:w-3.5 text-muted-foreground shrink-0" />
-                <input
-                  type="date"
+              <div className="flex items-center bg-muted rounded-xl px-2 py-1.5 border border-border shadow-inner flex-1 md:flex-none md:w-fit justify-between min-w-0">
+                <DateInput
                   value={chartStart}
-                  onChange={(e) => setChartStart(e.target.value)}
-                  className="bg-transparent text-foreground text-[10px] md:text-sm focus:outline-none dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:invert-[.5] cursor-pointer w-[75px] md:w-[120px] p-0"
+                  onChange={(v) => setChartStart(v)}
+                  className="bg-transparent text-foreground text-[10px] md:text-sm focus:outline-none cursor-pointer w-[75px] md:w-[120px] p-0"
                 />
                 <span className="text-muted-foreground font-bold text-[10px] px-0.5">
                   →
                 </span>
-                <input
-                  type="date"
+                <DateInput
                   value={chartEnd}
-                  onChange={(e) => setChartEnd(e.target.value)}
-                  className="bg-transparent text-foreground text-[10px] md:text-sm focus:outline-none dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:invert-[.5] cursor-pointer w-[75px] md:w-[120px] p-0"
+                  onChange={(v) => setChartEnd(v)}
+                  className="bg-transparent text-foreground text-[10px] md:text-sm focus:outline-none cursor-pointer w-[75px] md:w-[120px] p-0"
                 />
               </div>
             </div>
