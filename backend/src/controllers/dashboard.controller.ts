@@ -35,7 +35,7 @@ export const getDashboardStats = async (req: AuthRequest, res: Response) => {
         const chartEndStr = (req.query.chartEnd as string) || "";
 
         // CHECKS CACHE
-        const cacheKey = `${process.env.NODE_ENV || 'dev'}:dashboard:stats:v14:${restaurantId}:${dateKey}:${chartStartStr}:${chartEndStr}`;
+        const cacheKey = `${process.env.NODE_ENV || 'dev'}:dashboard:stats:v15:${restaurantId}:${dateKey}:${chartStartStr}:${chartEndStr}`;
         let cachedData = null;
         try {
             cachedData = await redis.get(cacheKey);
@@ -47,7 +47,7 @@ export const getDashboardStats = async (req: AuthRequest, res: Response) => {
             return res.json(JSON.parse(cachedData));
         }
         
-        console.log(`[Dashboard] Fetching fresh stats (v12) for ${dateKey} (Restaurant: ${restaurantId})`);
+        console.log(`[Dashboard] Fetching fresh stats (v15) for ${dateKey} (Restaurant: ${restaurantId})`);
 
         // Efficiently aggregate data
         // Fetch ALL reservations for the day to aggregate in memory (avoids complex SQL group logic for now)

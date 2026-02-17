@@ -11,7 +11,7 @@ export const clearDashboardCache = async (restaurantId: number) => {
     try {
         const env = process.env.NODE_ENV || 'dev';
         // Matches all dashboard stats keys for this restaurant (v13 schema)
-        const pattern = `${env}:dashboard:stats:v13:${restaurantId}:*`;
+        const pattern = `${env}:dashboard:stats:v15:${restaurantId}:*`;
         
         let cursor = '0';
         let totalCleared = 0;
