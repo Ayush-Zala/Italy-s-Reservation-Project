@@ -36,7 +36,7 @@ import {
   LabelList,
 } from "recharts";
 import { WhatsAppTemplateSelector } from "@/components/chat/whatsapp-template-selector";
-import { cn } from "@/lib/utils";
+import { cn, getMonthName } from "@/lib/utils";
 import { useTheme } from "@/context/use-theme";
 
 const getISTDate = () => {
@@ -443,9 +443,11 @@ export default function DashboardPage() {
                       <Label
                         value={
                           stats.analyticsData.length > 0
-                            ? new Date(
-                                `${stats.analyticsData[0].date}T00:00:00.000Z`,
-                              ).toLocaleString("en-US", { month: "long" })
+                            ? getMonthName(
+                                new Date(
+                                  `${stats.analyticsData[0].date}T00:00:00.000Z`,
+                                ),
+                              )
                             : "Month"
                         }
                         position="bottom"

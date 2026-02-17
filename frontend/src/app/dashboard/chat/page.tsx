@@ -24,7 +24,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+import { cn, formatTime12 } from "@/lib/utils";
 import { WhatsAppTemplateSelector } from "@/components/chat/whatsapp-template-selector";
 import { MessageFormatter } from "@/components/chat/message-formatter";
 
@@ -390,16 +390,7 @@ export default function ChatPage() {
                             </span>
                           )}
                           <span className="text-[10px] md:text-xs text-muted-foreground whitespace-nowrap">
-                            {chat.timestamp
-                              ? new Date(chat.timestamp).toLocaleTimeString(
-                                  [],
-                                  {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                    hour12: true,
-                                  },
-                                )
-                              : ""}
+                            {chat.timestamp ? formatTime12(chat.timestamp) : ""}
                           </span>
                         </div>
                       </div>
@@ -524,11 +515,7 @@ export default function ChatPage() {
                       <MessageFormatter content={msg.content} />
                     )}
                     <span className="text-[9px] md:text-[10px] opacity-70 block text-right mt-0.5 md:mt-1">
-                      {new Date(msg.timestamp).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        hour12: true,
-                      })}
+                      {formatTime12(msg.timestamp)}
                       {msg.status &&
                         msg.direction === "outbound" &&
                         ` • ${msg.status}`}
