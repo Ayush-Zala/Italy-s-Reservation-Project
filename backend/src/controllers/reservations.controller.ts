@@ -933,6 +933,49 @@ export const cancelReservation = async (req: AuthRequest, res: Response) => {
         res.status(500).json({ message: 'Error cancelling reservation', error });
     }
 }
+// Update Attendance Status
+export const updateAttendanceStatus = async (req: AuthRequest, res: Response) => {
+    try {
+        const restaurantId = req.user?.restaurantId;
+        if (!restaurantId) return res.status(401).json({ message: 'Unauthorized' });
+
+        const { id } = req.params;
+        const { attendanceStatus } = req.body;
+
+        if (!['SHOW', 'NO_SHOW', 'PENDING'].includes(attendanceStatus)) {
+            return res.status(400).json({ message: 'Invalid attendance status' });
+        }
+
+        const reservation = await prisma.reservation.findFirst({
+            where: { id: parseInt(id), table: { restaurantId } }
+        });
+
+        if (!reservation) return res.status(404).json({ message: 'Reservation not found' });
+
+        if (reservation.groupId) {
+            await prisma.reservation.updateMany({
+                where: { groupId: reservation.groupId },
+                // @ts-ignore
+                data: { attendanceStatus }
+            });
+        } else {
+            await prisma.reservation.update({
+                where: { id: parseInt(id) },
+                // @ts-ignore
+                data: { attendanceStatus }
+            });
+        }
+
+        // Invalidate Cache
+        await clearDashboardCache(restaurantId);
+
+        res.status(200).json({ message: 'Attendance status updated successfully' });
+    } catch (error) {
+        console.error('Update Attendance Error:', error);
+        res.status(500).json({ message: 'Failed to update attendance status' });
+    }
+};
+
 // Export Reservations to Excel
 export const exportReservations = async (req: AuthRequest, res: Response) => {
     try {
@@ -1003,6 +1046,7 @@ export const exportReservations = async (req: AuthRequest, res: Response) => {
                 { header: 'Kids', key: 'kids', width: 10 },
                 { header: 'Food Pref', key: 'foodPref', width: 15 },
                 { header: 'Special Req', key: 'specialReq', width: 30 },
+                { header: 'Attendance', key: 'attendance', width: 15 },
             ];
 
             // Style Header
@@ -1050,7 +1094,8 @@ export const exportReservations = async (req: AuthRequest, res: Response) => {
                     adults: r.adults,
                     kids: r.kids,
                     foodPref: r.foodPref,
-                    specialReq: r.specialReq || '-'
+                    specialReq: r.specialReq || '-',
+                    attendance: r.attendanceStatus === 'SHOW' ? 'Show' : r.attendanceStatus === 'NO_SHOW' ? 'No Show' : 'Pending'
                 });
             });
         });

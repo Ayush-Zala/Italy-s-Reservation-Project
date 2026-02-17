@@ -35,7 +35,7 @@ export const getDashboardStats = async (req: AuthRequest, res: Response) => {
         const chartEndStr = (req.query.chartEnd as string) || "";
 
         // CHECKS CACHE
-        const cacheKey = `${process.env.NODE_ENV || 'dev'}:dashboard:stats:v13:${restaurantId}:${dateKey}:${chartStartStr}:${chartEndStr}`;
+        const cacheKey = `${process.env.NODE_ENV || 'dev'}:dashboard:stats:v14:${restaurantId}:${dateKey}:${chartStartStr}:${chartEndStr}`;
         let cachedData = null;
         try {
             cachedData = await redis.get(cacheKey);
@@ -95,6 +95,8 @@ export const getDashboardStats = async (req: AuthRequest, res: Response) => {
                     // @ts-ignore
                     notificationType: true,
                     status: true,
+                    // @ts-ignore
+                    attendanceStatus: true,
                     // @ts-ignore
                     cancellationReason: true,
                     groupId: true,
@@ -178,12 +180,15 @@ export const getDashboardStats = async (req: AuthRequest, res: Response) => {
                 // Cancelled Logic
                 if (res.groupId) {
                      if (!cancelledReservationsMap.has(res.groupId)) {
+                        // @ts-ignore
                         cancelledReservationsMap.set(res.groupId, { ...res, table: { tableNumber: res.table.tableNumber.toString() } });
                      } else {
                         const existing = cancelledReservationsMap.get(res.groupId);
+                        // @ts-ignore
                         if (existing) existing.table.tableNumber += `+${res.table.tableNumber}`;
                      }
                 } else {
+                    // @ts-ignore
                     cancelledReservationsMap.set(`ID-${res.id}`, { ...res, table: { tableNumber: res.table.tableNumber.toString() } });
                 }
                 return; // Skip stats for cancelled
@@ -195,25 +200,31 @@ export const getDashboardStats = async (req: AuthRequest, res: Response) => {
                     processedGroups.add(res.groupId);
                     bookingsCount++;
                     guestsCount += (res.adults + res.kids);
+                    // @ts-ignore
                     groupedReservationsMap.set(res.groupId, { ...res, table: { tableNumber: res.table.tableNumber.toString() } });
                 } else {
                     const existing = groupedReservationsMap.get(res.groupId);
+                    // @ts-ignore
                     if (existing) existing.table.tableNumber += `+${res.table.tableNumber}`;
                 }
             } else {
                 bookingsCount++;
                 guestsCount += (res.adults + res.kids);
+                // @ts-ignore
                 groupedReservationsMap.set(`ID-${res.id}`, { ...res, table: { tableNumber: res.table.tableNumber.toString() } });
             }
 
             // --- SLOT ANALYTICS UPDATE ---
+            // @ts-ignore
             const slotKey = res.slot.startTime;
             
             if (!slotMap.has(slotKey)) {
                 slotMap.set(slotKey, {
+                    // @ts-ignore
                     timeDisplay: `${formatTime(res.slot.startTime)} - ${formatTime(res.slot.endTime)}`,
                     bookings: new Set(),
                     guests: 0,
+                    // @ts-ignore
                     startTime: res.slot.startTime
                 });
             }

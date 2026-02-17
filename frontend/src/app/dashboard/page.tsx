@@ -71,6 +71,7 @@ interface ReservationSummary {
   kids: number;
   cancellationReason?: string;
   notificationType?: string;
+  attendanceStatus?: "PENDING" | "SHOW" | "NO_SHOW";
 }
 
 const formatTemplateName = (type?: string) => {
@@ -617,7 +618,14 @@ export default function DashboardPage() {
                   {stats.recentReservations.map((res: ReservationSummary) => (
                     <div
                       key={res.id}
-                      className="p-3 md:p-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2 md:gap-4 hover:bg-muted/50 cursor-pointer transition-colors"
+                      className={cn(
+                        "p-3 sm:p-4 flex flex-col gap-3 hover:bg-muted/50 cursor-pointer transition-colors border-l-4",
+                        res.attendanceStatus === "SHOW"
+                          ? "border-l-green-500"
+                          : res.attendanceStatus === "NO_SHOW"
+                            ? "border-l-red-500"
+                            : "border-l-transparent",
+                      )}
                       onClick={() => {
                         const dateStr = res.date
                           ? res.date.toString().split("T")[0]
@@ -625,33 +633,40 @@ export default function DashboardPage() {
                         window.location.href = `/dashboard/reservations?date=${dateStr}&slotId=${res.slotId}`;
                       }}
                     >
-                      <div className="flex items-start justify-between md:justify-start gap-3 md:gap-4">
-                        <div className="flex bg-muted text-foreground font-bold px-2 py-1.5 md:px-3 md:py-2 rounded-lg items-center justify-center min-w-10 md:min-w-12 border border-border">
-                          <span className="text-base md:text-lg">
-                            {res.table.tableNumber
-                              .split("+")
-                              .sort((a, b) => Number(a) - Number(b))
-                              .join(", ")}
-                          </span>
+                      {/* Top Row: Table, Info, and Buttons */}
+                      <div className="flex justify-between items-start">
+                        <div className="flex items-start gap-3">
+                          <div className="flex bg-muted text-foreground font-bold px-3 py-2 rounded-lg items-center justify-center min-w-[48px] border border-border">
+                            <span className="text-lg">
+                              {res.table.tableNumber
+                                .split("+")
+                                .sort((a, b) => Number(a) - Number(b))
+                                .join(", ")}
+                            </span>
+                          </div>
+                          <div className="flex flex-col">
+                            <div className="font-bold text-foreground text-sm sm:text-base">
+                              {res.customerName}
+                            </div>
+                            <div className="text-xs sm:text-sm text-muted-foreground font-medium">
+                              {res.contact}
+                            </div>
+                          </div>
                         </div>
-                        <div>
-                          <div className="font-semibold text-foreground text-sm md:text-base truncate max-w-[120px] sm:max-w-none">
-                            {res.customerName}
-                          </div>
-                          <div className="text-xs md:text-sm text-muted-foreground">
-                            {res.contact}
-                          </div>
-                          {role === "ADMIN" && (
-                            <div
-                              onClick={(e) => e.stopPropagation()}
-                              className="mt-1 flex items-center gap-2 flex-wrap"
-                            >
+
+                        {/* Action Buttons Column */}
+                        {role === "ADMIN" && (
+                          <div
+                            className="flex flex-col items-end gap-1.5"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <div className="flex items-center gap-1.5">
                               <WhatsAppTemplateSelector
                                 phone={res.contact}
                                 onSendSuccess={fetchStats}
                                 reservation={res}
                                 trigger={
-                                  <button className="text-[9px] md:text-[10px] bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded shadow-sm transition-colors uppercase font-bold tracking-wider">
+                                  <button className="text-[10px] bg-green-600 hover:bg-green-700 text-white px-2.5 py-1 rounded shadow-sm transition-colors uppercase font-bold tracking-wider">
                                     WhatsApp
                                   </button>
                                 }
@@ -661,67 +676,119 @@ export default function DashboardPage() {
                                   e.stopPropagation();
                                   handleCancelReservation(res.id);
                                 }}
-                                className="p-0.5 hover:bg-destructive/10 rounded-md transition-all group/cancel"
+                                className="text-red-500 hover:text-red-600 transition-colors p-0.5"
                                 title="Cancel Reservation"
                                 type="button"
                               >
-                                <XCircle className="h-4 w-4 text-red-500 group-hover/cancel:text-red-600" />
+                                <XCircle className="h-5 w-5" />
                               </button>
                             </div>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="flex flex-row md:flex-1 items-center justify-start md:justify-center px-0 md:px-4">
-                        {res.notificationType && (
-                          <div className="bg-muted border border-border rounded-lg px-2 py-0.5 md:px-3 md:py-1.5 flex items-center gap-2 md:flex-col md:gap-0">
-                            <span className="text-[9px] md:text-[10px] text-muted-foreground font-bold uppercase tracking-widest leading-none">
-                              Package:
-                            </span>
-                            <span className="text-xs md:text-sm font-semibold text-foreground whitespace-nowrap">
-                              {formatTemplateName(res.notificationType)}
-                            </span>
+                            <div className="flex items-center gap-1.5">
+                              <button
+                                onClick={async (e) => {
+                                  e.stopPropagation();
+                                  try {
+                                    await reservationService.updateAttendanceStatus(
+                                      res.id,
+                                      "SHOW",
+                                    );
+                                    fetchStats();
+                                  } catch (err) {
+                                    console.error(
+                                      "Failed to update status",
+                                      err,
+                                    );
+                                  }
+                                }}
+                                className={cn(
+                                  "text-[9px] px-2.5 py-1 rounded-full shadow-sm transition-all uppercase font-bold tracking-wider border",
+                                  res.attendanceStatus === "SHOW"
+                                    ? theme === "dark"
+                                      ? "bg-white text-black border-white"
+                                      : "bg-black text-white border-black"
+                                    : "bg-transparent text-foreground border-border hover:bg-muted-foreground/10",
+                                )}
+                              >
+                                Show
+                              </button>
+                              <button
+                                onClick={async (e) => {
+                                  e.stopPropagation();
+                                  try {
+                                    await reservationService.updateAttendanceStatus(
+                                      res.id,
+                                      "NO_SHOW",
+                                    );
+                                    fetchStats();
+                                  } catch (err) {
+                                    console.error(
+                                      "Failed to update status",
+                                      err,
+                                    );
+                                  }
+                                }}
+                                className={cn(
+                                  "text-[9px] px-2.5 py-1 rounded-full shadow-sm transition-all uppercase font-bold tracking-wider border",
+                                  res.attendanceStatus === "NO_SHOW"
+                                    ? "bg-red-500 text-white border-red-500"
+                                    : "bg-transparent text-foreground border-border hover:bg-red-500 hover:text-white",
+                                )}
+                              >
+                                No Show
+                              </button>
+                            </div>
                           </div>
                         )}
                       </div>
 
-                      <div className="flex flex-row md:flex-row md:items-center justify-between gap-2 md:gap-8 w-full md:w-auto border-t border-border pt-2 md:border-0 md:pt-0">
-                        <div className="text-left md:text-right md:max-w-[200px]">
-                          <div
-                            className={cn(
-                              "text-[10px] md:text-xs font-medium",
-                              "text-muted-foreground", // Removed yellow
-                            )}
-                          >
-                            Diet: {res.foodPref}
+                      {/* Middle Row: Package Pill */}
+                      {res.notificationType && (
+                        <div className="w-fit">
+                          <div className="bg-muted border border-border rounded-lg px-3 py-1 flex items-center gap-2">
+                            <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
+                              Package:
+                            </span>
+                            <span className="text-xs sm:text-sm font-semibold text-foreground">
+                              {formatTemplateName(res.notificationType)}
+                            </span>
                           </div>
-                          {res.specialReq && (
-                            <div
-                              className="text-[10px] md:text-xs text-foreground italic truncate"
-                              title={res.specialReq}
-                            >
-                              &quot;{res.specialReq}&quot;
-                            </div>
-                          )}
                         </div>
+                      )}
 
-                        <div className="text-center md:text-right min-w-[70px] md:min-w-[80px]">
-                          <div className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">
-                            Time
-                          </div>
-                          <div className="text-xs md:text-sm font-medium text-foreground">
-                            {res.slot.startTime} - {res.slot.endTime}
-                          </div>
+                      {/* Bottom Row: 3-Column Info */}
+                      <div className="grid grid-cols-3 gap-2 border-t border-border pt-3">
+                        <div className="flex flex-col">
+                          <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                            Diet
+                          </span>
+                          <span className="text-xs sm:text-sm font-medium text-foreground truncate">
+                            {res.foodPref}
+                          </span>
                         </div>
-                        <div className="text-right min-w-[70px] md:min-w-[80px]">
-                          <div className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">
+                        <div className="flex flex-col items-center">
+                          <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                            Time
+                          </span>
+                          <span className="text-xs sm:text-sm font-medium text-foreground whitespace-nowrap">
+                            {res.slot.startTime} - {res.slot.endTime}
+                          </span>
+                        </div>
+                        <div className="flex flex-col items-end">
+                          <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
                             Guests
-                          </div>
-                          <div className="text-xs md:text-sm font-medium text-foreground">
+                          </span>
+                          <span className="text-xs sm:text-sm font-medium text-foreground whitespace-nowrap">
                             {res.adults} Adults, {res.kids} Kids
-                          </div>
+                          </span>
                         </div>
                       </div>
+
+                      {/* Special Request Sub-text */}
+                      {res.specialReq && (
+                        <div className="text-[10px] sm:text-xs text-foreground/80 italic bg-muted/30 px-2 py-1 rounded border-l-2 border-border mt-1">
+                          &quot;{res.specialReq}&quot;
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

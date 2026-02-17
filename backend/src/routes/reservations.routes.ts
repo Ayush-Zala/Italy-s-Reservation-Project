@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getSlots, getReservations, getTablesWithReservations, createReservation, createSlots, deleteSlot, updateReservation, cancelReservation, moveReservation, exportReservations } from '../controllers/reservations.controller';
+import { getSlots, getReservations, getTablesWithReservations, createReservation, createSlots, deleteSlot, updateReservation, cancelReservation, moveReservation, exportReservations, updateAttendanceStatus } from '../controllers/reservations.controller';
 import { authenticateToken } from '../middleware/auth.middleware';
 
 const router = Router();
@@ -16,6 +16,7 @@ router.get('/export', exportReservations); // New Export Endpoint
 router.post('/', createReservation);
 router.put('/:id', updateReservation);
 router.put('/:id/move', moveReservation);
+router.patch('/:id/attendance', updateAttendanceStatus);
 router.delete('/:id', cancelReservation);
 
 export default router;

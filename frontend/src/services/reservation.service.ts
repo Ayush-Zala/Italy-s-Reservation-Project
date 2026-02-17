@@ -34,6 +34,7 @@ export interface Reservation {
   startTime?: string;
   endTime?: string;
   notificationType?: string;
+  attendanceStatus?: 'PENDING' | 'SHOW' | 'NO_SHOW';
 }
 
 export interface CreateReservationDto {
@@ -133,6 +134,13 @@ class ReservationService {
      const response = await api.get<Table[]>("/tables");
      return response.data;
   }
+
+   async updateAttendanceStatus(id: number, status: 'SHOW' | 'NO_SHOW' | 'PENDING') {
+     const response = await api.patch<{ message: string }>(`/reservations/${id}/attendance`, {
+       attendanceStatus: status
+     });
+     return response.data;
+   }
 }
 
 export const reservationService = new ReservationService();
